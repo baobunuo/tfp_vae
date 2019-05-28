@@ -116,21 +116,21 @@ class VAE:
             res_tower_output = r3
 
             if self.discrete_outputs:
-                decoded_px = tf.layers.conv2d_transpose(
+                decoded_logits_x = tf.layers.conv2d_transpose(
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, padding='same',
-                    activation=tf.nn.sigmoid)
-                x_dist = tf.distributions.Bernoulli(probs=decoded_px)
+                    activation=None)
+                x_dist = tf.distributions.Bernoulli(logits=decoded_logits_x)
                 return x_dist
             else:
                 decoded_mu_x = tf.layers.conv2d_transpose(
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, padding='same',
                     activation=tf.nn.tanh)
 
-                decoded_var_x = 0.01 + 1.0 + tf.layers.conv2d_transpose(
+                decoded_sigma_x = 0.10 + 1.0 + tf.layers.conv2d_transpose(
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, padding='same',
                     activation=tf.nn.elu)
 
-                x_dist = tf.distributions.Normal(loc=decoded_mu_x, scale=tf.sqrt(decoded_var_x))
+                x_dist = tf.distributions.Normal(loc=decoded_mu_x, scale=decoded_sigma_x)
                 return x_dist
 
     def encoder_res_block(self, inputs, name):
