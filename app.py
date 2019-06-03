@@ -82,13 +82,18 @@ def main(_):
             'tensorboard': calls.tensorboard(train_writer), 
             'checkpointing': calls.checkpointing(sess, checkpoint_dir, saver)
         }
-    elif FLAGS.mode not in ['train', 'eval']:
+        routine(ds_train, sess, model, callbacks)
+
+    elif FLAGS.mode == 'eval':
+        callbacks = {}
+        routine(ds_test, sess, model, callbacks)
+
+    else:
         output_dir = FLAGS.output_dir
         callbacks = {
             'visualization': calls.visualization(output_dir)
         }
-
-    routine(ds_train, sess, model, callbacks)
+        routine(ds_train, sess, model, callbacks)
 
 
 if __name__ == '__main__':
