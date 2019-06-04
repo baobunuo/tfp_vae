@@ -4,9 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def checkpointing(sess, checkpoint_dir, saver):
-    func = lambda: saver.save(sess, checkpoint_dir)
+def checkpointing(sess, saver, checkpoint_dir, checkpoint_frequency):
+    def func(step):
+        if step > 0 and step % checkpoint_frequency == 0:
+            saver.save(sess, checkpoint_dir)
+
     return func
+
 
 def tensorboard(writer):
     def func(step, summary):
@@ -14,6 +18,7 @@ def tensorboard(writer):
         writer.flush()
 
     return func
+
 
 def visualization(output_dir):
     def func(img):

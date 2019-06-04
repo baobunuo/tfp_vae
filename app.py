@@ -26,7 +26,9 @@ flags.DEFINE_string("output_dir", 'output/', "output_dir: directory for visualiz
 
 flags.DEFINE_string("checkpoint_dir", 'checkpoints/', "checkpoint_dir: directory for saving model checkpoints")
 flags.DEFINE_string("load_checkpoint", '', "load_checkpoint: checkpoint directory or checkpoint to load")
-flags.DEFINE_integer("epochs", 10, "epochs: number of epochs to train for")
+flags.DEFINE_integer("checkpoint_frequency", 500, "checkpoint_frequency: frequency to save checkpoints, measured in global steps")
+
+flags.DEFINE_integer("epochs", 10, "epochs: number of epochs to train for. ignored if mode is not 'train'")
 
 FLAGS = flags.FLAGS
 
@@ -71,16 +73,17 @@ def main(_):
         'train': routines.train,
         'eval': routines.evaluate,
         'generate': routines.generate,
-        #'reconstruct': routines.reconstruct,
-        #'interpolate': routines.interpolate
+        'reconstruct': routines.reconstruct,
+        'interpolate': routines.interpolate
     }
     routine = mode_to_routine[FLAGS.mode]
 
     if FLAGS.mode == 'train':
         checkpoint_dir = FLAGS.checkpoint_dir
+        checkpoint_frequency = FLAGS.checkpoint_frequency
         callbacks = {
             'tensorboard': calls.tensorboard(train_writer), 
-            'checkpointing': calls.checkpointing(sess, checkpoint_dir, saver)
+            'checkpointing': calls.checkpointing(sess, saver, checkpoint_dir, checkpoint_frequency)
         }
         routine(ds_train, sess, model, callbacks)
 

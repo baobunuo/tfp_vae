@@ -161,15 +161,3 @@ class VAE:
         z = np.random.normal(loc=0.0, scale=1.0, size=(num_samples, self.z_dim))
         x_gen = self.generate_from_code(sess, z)
         return x_gen
-
-    def interpolate(self, sess, x1, x2):
-        xs = np.stack([x1, x2], axis=0)
-        zs = self.get_code(sess, xs)
-        z1 = zs[0]
-        z2 = zs[1]
-
-        pts = 5
-        ts = [(float(i) / float(pts-1)) for i in range(0, pts)]
-        interpolation_zs = [(1.0 - t) * z1 + t * z2 for t in ts]
-        x_gen = self.generate_from_code(sess, interpolation_zs)
-        return x_gen
