@@ -74,7 +74,8 @@ def main(_):
         'eval': routines.evaluate,
         'generate': routines.generate,
         'reconstruct': routines.reconstruct,
-        'interpolate': routines.interpolate
+        'interpolate': routines.interpolate,
+        'interpolation_gif': routines.interpolation_gif
     }
     routine = mode_to_routine[FLAGS.mode]
 
@@ -94,7 +95,8 @@ def main(_):
     else:
         output_dir = FLAGS.output_dir
         callbacks = {
-            'visualization': calls.visualization(output_dir)
+            'save_png': calls.save_png(output_dir),
+            'save_gif': calls.save_gif(output_dir)
         }
         routine(ds_train, sess, model, callbacks)
 

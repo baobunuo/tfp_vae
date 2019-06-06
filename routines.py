@@ -38,7 +38,7 @@ def generate(dataset, sess, model, callbacks):
         rows.append(row)
 
     img = np.concatenate(rows, axis=0)
-    fp = callbacks['visualization'](img)
+    fp = callbacks['save_png'](img)
     print(fp)
 
 
@@ -57,7 +57,7 @@ def reconstruct(dataset, sess, model, callbacks):
             col = np.concatenate(col, axis=0)
             columns.append(col)
         img = np.concatenate(columns, axis=1)
-        fp = callbacks['visualization'](img)
+        fp = callbacks['save_png'](img)
         print(fp)
 
         break
@@ -87,7 +87,49 @@ def interpolate(dataset, sess, model, callbacks):
         columns.append(col)
 
         img = np.concatenate(columns, axis=1)
-        fp = callbacks['visualization'](img)
+        fp = callbacks['save_png'](img)
         print(fp)
+
+        break
+
+
+def interpolation_gif(dataset, sess, model, callbacks):
+
+    for batch in tfds.as_numpy(dataset):
+        batch_size = batch.shape[0]
+        xs = batch
+        permutation = np.random.permutation(batch_size)
+        permuted_xs = xs[permutation]
+        z0 = model.get_code(sess, xs)
+        zT = model.get_code(sess, permuted_xs)
+        n = 8
+        ts = [(t / float(n - 1)) for t in range(0, n)]
+        zs = [(1. - t) * z0 + t * zT for t in ts]
+        Z = np.stack(zs, axis=0)  # [T, B, Z]
+        Z = np.transpose(Z, [1, 0, 2])
+
+        print('saving images...')
+        for b in range(0, batch_size):
+            img_frames = []
+            img_frames.append(xs[b])
+            for i in range(0, n):
+                z_i = Z[b][i]
+                z_i = np.expand_dims(z_i, 0)
+                x_i = model.generate_from_code(sess, z_i)
+                x_i = np.squeeze(x_i, 0)
+                img_frames.append(x_i)
+            img_frames.append(permuted_xs[b])
+            
+            if x_i.shape[-1] == 1:
+                transform = lambda x_i: np.concatenate([x_i, x_i, x_i], axis=-1)
+                img_frames = list(map(transform, img_frames))
+            elif x_i.shape[-1] == 3:
+                transform = lambda x_i: 0.5 * x_i + 0.5
+                img_frames = list(map(transform, img_frames))
+
+            print(len(img_frames))
+            print(img_frames[0].shape)
+            fp = callbacks['save_gif'](img_frames)
+            print(fp)
 
         break
