@@ -10,8 +10,9 @@ class VAE:
         
         self.z_dim = hps.z_dim
         self.num_filters = 32
-        self.activation = hps.activation
+        self.activation = self.get_activation(hps.activation)
         self.discrete_outputs = hps.discrete_outputs
+
         self.global_step = tf.train.get_or_create_global_step()
 
         self.scope = 'VAE' if name is None else name
@@ -135,6 +136,13 @@ class VAE:
                 padding='same', activation=self.activation)
 
             return d0 + d2
+
+    def get_activation(self, name):
+        activations = {
+            'relu': tf.nn.relu,
+            'elu': tf.nn.elu
+        }
+        return activations[name]
 
     def train(self, sess, x):
         _, elbo, gs, ms = sess.run(

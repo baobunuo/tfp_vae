@@ -38,6 +38,10 @@ def generate(dataset, sess, model, callbacks):
         rows.append(row)
 
     img = np.concatenate(rows, axis=0)
+
+    if img.shape[-1] == 3:
+        img = 0.5 * img + 0.5
+
     fp = callbacks['save_png'](img)
     print(fp)
 
@@ -57,6 +61,10 @@ def reconstruct(dataset, sess, model, callbacks):
             col = np.concatenate(col, axis=0)
             columns.append(col)
         img = np.concatenate(columns, axis=1)
+
+        if img.shape[-1] == 3:
+            img = 0.5 * img + 0.5
+
         fp = callbacks['save_png'](img)
         print(fp)
 
@@ -87,6 +95,10 @@ def interpolate(dataset, sess, model, callbacks):
         columns.append(col)
 
         img = np.concatenate(columns, axis=1)
+
+        if img.shape[-1] == 3:
+            img = 0.5 * img + 0.5
+
         fp = callbacks['save_png'](img)
         print(fp)
 

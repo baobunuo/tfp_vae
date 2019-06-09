@@ -11,15 +11,16 @@ import routines
 flags = tf.app.flags
 
 
-flags.DEFINE_string("mode", 'train', "mode: train, eval, generate, reconstruct, interpolate ['train']")
+flags.DEFINE_enum("mode", 'train', ['train', 'eval', 'generate', 'reconstruct', 'interpolate'], "mode: one of train, eval, generate, reconstruct, interpolate.")
 
-flags.DEFINE_string("dataset", 'mnist', "dataset: which dataset to use ['mnist']")
+flags.DEFINE_enum("dataset", 'mnist', ['mnist', 'celeb_a', 'cifar10', 'omniglot'], "dataset: which dataset to use")
 flags.DEFINE_integer("img_height", 32, "img_height: height to scale images to, in pixels")
 flags.DEFINE_integer("img_width", 32, "img_width: width to scale images to, in pixels")
 flags.DEFINE_integer("img_channels", 1, "img_channels: number of image channels")
 
 flags.DEFINE_integer("batch_size", 64, "batch_size: number of examples per minibatch")
 flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
+flags.DEFINE_enum("activation", 'relu', ['relu', 'elu'], "activation: the activation function for the convolutional layers")
 
 flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logging")
 flags.DEFINE_string("output_dir", 'output/', "output_dir: directory for visualizations")
@@ -43,7 +44,7 @@ def main(_):
         img_channels=FLAGS.img_channels,
         discrete_outputs=(True if FLAGS.img_channels == 1 else False),
         z_dim=FLAGS.z_dim,
-        activation=tf.nn.elu,
+        activation=FLAGS.activation,
         epochs=FLAGS.epochs
     )
 
