@@ -139,8 +139,6 @@ def interpolation_gif(dataset, sess, model, callbacks):
                 transform = lambda x_i: 0.5 * x_i + 0.5
                 img_frames = list(map(transform, img_frames))
 
-            print(len(img_frames))
-            print(img_frames[0].shape)
             fp = callbacks['save_gif'](img_frames)
             print(fp)
 
