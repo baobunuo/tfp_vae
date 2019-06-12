@@ -19,10 +19,13 @@ flags.DEFINE_integer("img_width", 32, "img_width: width to scale images to, in p
 flags.DEFINE_integer("img_channels", 1, "img_channels: number of image channels")
 
 flags.DEFINE_integer("batch_size", 64, "batch_size: number of examples per minibatch")
+flags.DEFINE_integer("num_filters", 32, "num_filters: number of convolutional filters per layer")
 flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
+flags.DEFINE_integer("encoder_res_blocks", 3, "encoder_res_blocks: number of blocks in the encoder")
+flags.DEFINE_integer("decoder_res_blocks", 3, "decoder_res_blocks: number of blocks in the decoder")
 flags.DEFINE_enum("activation", 'relu', ['relu', 'elu'], "activation: the activation function for the convolutional layers")
 
-flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logging")
+flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logs")
 flags.DEFINE_string("output_dir", 'output/', "output_dir: directory for visualizations")
 
 flags.DEFINE_string("checkpoint_dir", 'checkpoints/', "checkpoint_dir: directory for saving model checkpoints")
@@ -38,20 +41,22 @@ def main(_):
 
     ## hyperparams
     hps = tf.contrib.training.HParams(
-        batch_size=FLAGS.batch_size,
-        img_height=FLAGS.img_height,
-        img_width=FLAGS.img_width,
-        img_channels=FLAGS.img_channels,
-        discrete_outputs=(True if FLAGS.img_channels == 1 else False),
-        z_dim=FLAGS.z_dim,
-        activation=FLAGS.activation,
-        epochs=FLAGS.epochs
-    )
+        batch_size = FLAGS.batch_size,
+        img_height = FLAGS.img_height,
+        img_width = FLAGS.img_width,
+        img_channels = FLAGS.img_channels,
+        num_filters = FLAGS.num_filters,
+        z_dim = FLAGS.z_dim,
+        encoder_res_blocks = FLAGS.encoder_res_blocks,
+        decoder_res_blocks = FLAGS.decoder_res_blocks,
+        activation = FLAGS.activation,
+        discrete_outputs = (True if FLAGS.img_channels == 1 else False),
+        epochs = FLAGS.epochs)
 
     ## dataset
-    ds_train, ds_test = get_dataset(
-        name=FLAGS.dataset, hps=hps)
+    ds_train, ds_test = get_dataset(name=FLAGS.dataset, hps=hps)
 
+    ## model and session
     model = VAE(hps)
     sess = tf.Session()
 
@@ -70,6 +75,7 @@ def main(_):
     if FLAGS.load_checkpoint != '':
         saver.restore(sess, FLAGS.load_checkpoint)
 
+    ## helper functions for the various modes supported by this application
     mode_to_routine = {
         'train': routines.train,
         'eval': routines.evaluate,
@@ -80,6 +86,8 @@ def main(_):
     }
     routine = mode_to_routine[FLAGS.mode]
 
+    ## rather than pass around tons of arguments,
+    #  just use callbacks to perform the required functionality
     if FLAGS.mode == 'train':
         checkpoint_dir = FLAGS.checkpoint_dir
         checkpoint_frequency = FLAGS.checkpoint_frequency
