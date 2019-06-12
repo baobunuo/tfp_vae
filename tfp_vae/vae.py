@@ -50,7 +50,7 @@ class VAE:
 
             ## misc ops
             # decode for visualization
-            self.decoded_x = self.px_given_z(self.z).mean()
+            self.decoded_x = decoded_px.mean()
 
     def pz(self, batch_size):
         mu = tf.zeros(dtype=tf.float32, shape=[batch_size, self.z_dim])
@@ -66,9 +66,8 @@ class VAE:
             r2 = self.encoder_res_block(r1, name='block2')
             r3 = self.encoder_res_block(r2, name='block3')
             flat = tf.layers.flatten(r3)
-            enc_x = tf.layers.dense(flat, units=(2 * self.z_dim), activation=None)
-            mu = tf.layers.dense(enc_x, units=self.z_dim, activation=None)
-            logsigma = tf.layers.dense(enc_x, units=self.z_dim, activation=None)
+            fc = tf.layers.dense(flat, units=(2 * self.z_dim), activation=None)
+            mu, logsigma = tf.split(fc, 2, axis=1)
             z_dist = tfp.distributions.MultivariateNormalDiag(loc=mu, scale_diag=tf.exp(logsigma))
             z_dist = tfp.distributions.Independent(z_dist)
             return z_dist
