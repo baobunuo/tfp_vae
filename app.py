@@ -19,13 +19,13 @@ flags.DEFINE_integer("img_width", 32, "img_width: width to scale images to, in p
 flags.DEFINE_integer("img_channels", 1, "img_channels: number of image channels")
 
 flags.DEFINE_integer("batch_size", 64, "batch_size: number of examples per minibatch")
-flags.DEFINE_integer("num_filters", 32, "num_filters: number of colvolutional filters per layer")
+flags.DEFINE_integer("num_filters", 32, "num_filters: number of convolutional filters per layer")
 flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
 flags.DEFINE_integer("encoder_res_blocks", 3, "encoder_res_blocks: number of blocks in the encoder")
 flags.DEFINE_integer("decoder_res_blocks", 3, "decoder_res_blocks: number of blocks in the decoder")
 flags.DEFINE_enum("activation", 'relu', ['relu', 'elu'], "activation: the activation function for the convolutional layers")
 
-flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logging")
+flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logs")
 flags.DEFINE_string("output_dir", 'output/', "output_dir: directory for visualizations")
 
 flags.DEFINE_string("checkpoint_dir", 'checkpoints/', "checkpoint_dir: directory for saving model checkpoints")
