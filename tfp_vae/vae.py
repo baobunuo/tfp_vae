@@ -94,7 +94,7 @@ class VAE:
             blocks.append(decoder_input_3d)
             for k in range(0, self.decoder_res_blocks):
                 block_input = blocks[k]
-                block_output = self.decoder_res_block(block_input, name='block_{}'+str(k))
+                block_output = self.decoder_res_block(block_input, name='block_'+str(k))
                 blocks.append(block_output)
 
             res_tower_output = blocks[-1]
