@@ -4,17 +4,21 @@ import numpy as np
 
 class VAE:
     def __init__(self, hps, name=None):
+        assert self.hparams_ok(hps)
+
         self.img_height = hps.img_height
         self.img_width = hps.img_width
         self.img_channels = hps.img_channels
         
         self.z_dim = hps.z_dim
-        self.num_filters = 32
+        self.num_filters = hps.num_filters
         self.activation = self.get_activation(hps.activation)
         self.discrete_outputs = hps.discrete_outputs
 
-        self.global_step = tf.train.get_or_create_global_step()
+        self.encoder_res_blocks = hps.encoder_res_blocks
+        self.decoder_res_blocks = hps.decoder_res_blocks
 
+        self.global_step = tf.train.get_or_create_global_step()
         self.scope = 'VAE' if name is None else name
 
         with tf.variable_scope(self.scope):
@@ -62,10 +66,14 @@ class VAE:
     def qz_given_x(self, x):
         with tf.variable_scope('encoder', reuse=tf.AUTO_REUSE):
             x = tf.cast(x, dtype=tf.float32)
-            r1 = self.encoder_res_block(x, name='block1')
-            r2 = self.encoder_res_block(r1, name='block2')
-            r3 = self.encoder_res_block(r2, name='block3')
-            flat = tf.layers.flatten(r3)
+            blocks = []
+            blocks.append(x)
+            for k in range(0, self.encoder_res_blocks):
+                block_input = blocks[k]
+                block_output = self.encoder_res_block(block_input, name='block_'+str(k))
+                blocks.append(block_output)
+
+            flat = tf.layers.flatten(blocks[-1])
             fc = tf.layers.dense(flat, units=(2 * self.z_dim), activation=None)
             mu, logsigma = tf.split(fc, 2, axis=1)
             z_dist = tfp.distributions.MultivariateNormalDiag(loc=mu, scale_diag=tf.exp(logsigma))
@@ -75,17 +83,21 @@ class VAE:
     def px_given_z(self, z):
         with tf.variable_scope('decoder', reuse=tf.AUTO_REUSE):
             
-            s = (2 ** 3)
+            s = (2 ** self.decoder_res_blocks)
             fc1_units = (self.img_height // s) * (self.img_width // s) * self.num_filters
 
             fc1 = tf.layers.dense(z, units=fc1_units, activation=None)
             decoder_input_3d = tf.reshape(
                 fc1, shape=[-1, (self.img_height // s), (self.img_width // s), self.num_filters])
 
-            r1 = self.decoder_res_block(decoder_input_3d, name='block1')
-            r2 = self.decoder_res_block(r1, name='block2')
-            r3 = self.decoder_res_block(r2, name='block3')
-            res_tower_output = r3
+            blocks = []
+            blocks.append(decoder_input_3d)
+            for k in range(0, self.decoder_res_blocks):
+                block_input = blocks[k]
+                block_output = self.decoder_res_block(block_input, name='block_{}'+str(k))
+                blocks.append(block_output)
+
+            res_tower_output = blocks[-1]
 
             if self.discrete_outputs:
                 decoded_logits_x = tf.layers.conv2d_transpose(
@@ -142,6 +154,20 @@ class VAE:
             'elu': tf.nn.elu
         }
         return activations[name]
+
+    def hparams_ok(self, hps):
+        bool1 = (hps.img_height % (2 ** hps.encoder_res_blocks) == 0)
+        bool2 = (hps.img_width % (2 ** hps.encoder_res_blocks) == 0)
+        bool3 = (hps.img_height % (2 ** hps.decoder_res_blocks) == 0)
+        bool4 = (hps.img_width % (2 ** hps.decoder_res_blocks) == 0)
+
+        bool5a = (hps.img_channels == 1 and hps.discrete_outputs == True)  # binarized black and white
+        bool5b = (hps.img_channels == 1 and hps.discrete_outputs == False) # grayscale
+        bool5c = (hps.img_channels == 3 and hps.discrete_outputs == False) # color
+        bool5 = (bool5a or bool5b or bool5c)
+
+        ok = bool1 and bool2 and bool3 and bool4 and bool5
+        return ok
 
     def train(self, sess, x):
         _, elbo, gs, ms = sess.run(

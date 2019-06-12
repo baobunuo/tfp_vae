@@ -19,6 +19,7 @@ flags.DEFINE_integer("img_width", 32, "img_width: width to scale images to, in p
 flags.DEFINE_integer("img_channels", 1, "img_channels: number of image channels")
 
 flags.DEFINE_integer("batch_size", 64, "batch_size: number of examples per minibatch")
+flags.DEFINE_integer("num_filters", 32, "num_filters: number of colvolutional filters per layer")
 flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
 flags.DEFINE_enum("activation", 'relu', ['relu', 'elu'], "activation: the activation function for the convolutional layers")
 
@@ -42,9 +43,10 @@ def main(_):
         img_height=FLAGS.img_height,
         img_width=FLAGS.img_width,
         img_channels=FLAGS.img_channels,
-        discrete_outputs=(True if FLAGS.img_channels == 1 else False),
+        num_filters=FLAGS.num_filters,
         z_dim=FLAGS.z_dim,
         activation=FLAGS.activation,
+        discrete_outputs=(True if FLAGS.img_channels == 1 else False),
         epochs=FLAGS.epochs
     )
 
