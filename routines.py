@@ -105,7 +105,7 @@ def interpolate(dataset, sess, model, callbacks):
         break
 
 
-def interpolation_gif(dataset, sess, model, callbacks):
+def interpolate_gif(dataset, sess, model, callbacks):
     # creates a gif showing latent-space interpolations betwen randomly selected starting images and ending images
     # the images are arranged in a square shape, so that many examples can be visualized simultaneously.
 
