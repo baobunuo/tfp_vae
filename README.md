@@ -31,6 +31,7 @@ And you'll see some options like this:
 <details>
   <summary>click to expand view</summary>
 
+```
 app.py:
   --activation: <relu|elu>: activation: the activation function for the convolutional layers
     (default: 'relu')
