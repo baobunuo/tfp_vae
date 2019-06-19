@@ -11,7 +11,7 @@ import routines
 flags = tf.app.flags
 
 
-flags.DEFINE_enum("mode", 'train', ['train', 'eval', 'generate', 'reconstruct', 'interpolate'], "mode: one of train, eval, generate, reconstruct, interpolate.")
+flags.DEFINE_enum("mode", 'train', ['train', 'eval', 'generate', 'reconstruct', 'interpolate', 'interpolate_gif'], "mode: one of train, eval, generate, reconstruct, interpolate, interpolate_gif")
 
 flags.DEFINE_enum("dataset", 'mnist', ['mnist', 'celeb_a', 'cifar10', 'omniglot'], "dataset: which dataset to use")
 flags.DEFINE_integer("img_height", 32, "img_height: height to scale images to, in pixels")
@@ -82,7 +82,7 @@ def main(_):
         'generate': routines.generate,
         'reconstruct': routines.reconstruct,
         'interpolate': routines.interpolate,
-        'interpolation_gif': routines.interpolation_gif
+        'interpolate_gif': routines.interpolate_gif
     }
     routine = mode_to_routine[FLAGS.mode]
 

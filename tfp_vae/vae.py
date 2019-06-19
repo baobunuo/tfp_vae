@@ -112,9 +112,9 @@ class VAE:
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, 
                     padding='same', activation=tf.nn.tanh)
 
-                decoded_sigma_x = 0.10 + 1.0 + tf.layers.conv2d_transpose(
+                decoded_sigma_x = 0.10 + tf.layers.conv2d_transpose(
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, 
-                    padding='same', activation=tf.nn.elu)
+                    padding='same', activation=tf.nn.sigmoid)
                 
                 x_dist = tfp.distributions.MultivariateNormalDiag(
                     loc=decoded_mu_x, scale_diag=decoded_sigma_x)

@@ -34,7 +34,7 @@ def save_png(output_dir):
 
 
 def save_gif(output_dir):
-    duration = 2
+    duration = 4
     def func(imgs):
         def make_frame(t):
             x = imgs[int(len(imgs)/duration*t)]
