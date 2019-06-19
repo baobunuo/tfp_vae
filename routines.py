@@ -110,7 +110,7 @@ def interpolate_gif(dataset, sess, model, callbacks):
     # the images are arranged in a square shape, so that many examples can be visualized simultaneously.
 
     def make_image_grid(imgs, grid_height, grid_width):
-        assert len(imgs) == grid_height * grid_width
+        assert imgs.shape[0] == grid_height * grid_width
         rows = []
         for i in range(0, grid_height):
             row = []
@@ -130,8 +130,8 @@ def interpolate_gif(dataset, sess, model, callbacks):
 
         # we'll make an S x S shaped grid of images
         S = int(np.floor(np.sqrt(batch_size)).astype(np.int32))
-        xs = xs[0:S]
-        permuted_xs = permuted_xs[0:S]
+        xs = xs[0:S*S]
+        permuted_xs = permuted_xs[0:S*S]
 
         # starting codes
         z0 = model.get_code(sess, xs)
@@ -140,7 +140,7 @@ def interpolate_gif(dataset, sess, model, callbacks):
         zT = model.get_code(sess, permuted_xs)
 
         # intermediate codes z_i
-        n = 8
+        n = 20
         ts = [(i / float(n - 1)) for i in range(0, n)]
         zs = [(1. - t) * z0 + t * zT for t in ts]
         Z = np.stack(zs, axis=0)       # [T, B, Z]
@@ -151,7 +151,8 @@ def interpolate_gif(dataset, sess, model, callbacks):
         img_frames = []
         # include the starting images
         img = make_image_grid(xs, S, S)
-        img_frames.append(img)
+        initial_img_frames = [img for _ in range(0,(n//2))]
+        img_frames.extend(initial_img_frames)
 
         for i in range(0, n):
             z_i = Z[:, i, :] # [B, Z]
@@ -160,7 +161,11 @@ def interpolate_gif(dataset, sess, model, callbacks):
             img_frames.append(img)
 
         img = make_image_grid(permuted_xs, S, S)
-        img_frames.append(img)
+        initial_img_frames = [img for _ in range(0,(n//2))]
+        img_frames.extend(initial_img_frames)
+
+        # and include reverse interpolation too!
+        img_frames.extend(img_frames[::-1])
 
         if xs.shape[-1] == 1:
             transform = lambda x_i: np.concatenate([x_i, x_i, x_i], axis=-1)
