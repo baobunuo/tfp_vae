@@ -14,13 +14,9 @@ matplotlib==3.1.0
 moviepy==1.0.0
 ```
 
-## Datasets
-
-This implementation uses the Tensorflow Datasets library, and includes out-of-the-box support for MNIST, CelebA, CIFAR-10, and Omniglot. 
-While our preprocessing pipeline has only been tested on those datasets, in most cases, support for additional datasets can be added easily. 
-If you'd like support to be extended to any additional datasets contained in the Tensorflow Datasets library, feel free to open an issue.  
-
 ## Usage
+
+This implementation supports MNIST, CelebA, CIFAR-10, and Omniglot.
 
 To train a VAE on MNIST, you can run:
 
