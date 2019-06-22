@@ -112,7 +112,7 @@ class VAE:
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, 
                     padding='same', activation=tf.nn.tanh)
 
-                decoded_sigma_x = 0.10 + tf.layers.conv2d_transpose(
+                decoded_sigma_x = 0.01 + tf.layers.conv2d_transpose(
                     res_tower_output, filters=self.img_channels, kernel_size=1, strides=1, 
                     padding='same', activation=tf.nn.sigmoid)
                 

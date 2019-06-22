@@ -22,7 +22,11 @@ def preprocess_dataset(name, dataset, hps, epochs):
     f1 = lambda row: row["image"]
     f2 = lambda img: tf.cast(img, dtype=tf.int32)
     f3 = lambda img: tf.cast(img, dtype=tf.float32)
-    f4 = lambda img: img * tf.constant((1.0 / 255.0))
+
+    if hps.discrete_outputs:
+        f4 = lambda img: img * tf.constant((1.0 / 255.0))
+    else:
+        f4 = lambda img: img * tf.constant((1.0 / 256.0))
 
     if name == 'celeb_a':
         f5a = lambda img: img[((tf.shape(img)[0]//2)-54):((tf.shape(img)[0]//2)+54), ((tf.shape(img)[1]//2)-54):((tf.shape(img)[1]//2)+54)]
@@ -35,7 +39,9 @@ def preprocess_dataset(name, dataset, hps, epochs):
         f6 = lambda img: tf.round(tf.expand_dims(img[:,:,0], -1))
         f7 = lambda img: tf.cast(img, dtype=tf.int32)
     else:
-        f6 = lambda img: 2.0 * (img - 0.5)
+        f6a = lambda img: img + tf.random_uniform(minval=0.0, maxval=(1.0/256.0), shape=[hps.img_height, hps.img_width, hps.img_channels])
+        f6b = lambda img: 2.0 * (img - 0.5)
+        f6 = lambda img: f6b(f6a(img))
         f7 = lambda img: tf.cast(img, dtype=tf.float32)
 
     normalize_pixels = lambda row: f7(f6(f5(f4(f3(f2(f1(row)))))))
