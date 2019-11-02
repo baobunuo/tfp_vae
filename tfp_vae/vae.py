@@ -138,9 +138,8 @@ class VAE:
             bn1 = tf.layers.batch_normalization(conv1, training=training)
             act1 = tf.nn.relu(bn1)
 
-
             conv2 = tf.layers.conv2d(
-                act1, filters=self.num_filters, kernel_size=3,strides=1, padding='same',
+                act1, filters=self.num_filters, kernel_size=3, strides=1, padding='same',
                 kernel_initializer=he_init, activation=None)
             bn2 = tf.layers.batch_normalization(conv2, training=training)
             
