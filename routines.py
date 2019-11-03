@@ -41,6 +41,7 @@ def generate(dataset, sess, model, callbacks):
 
     if img.shape[-1] == 3:
         img = 0.5 * img + 0.5
+        img = np.maximum(1e-6, np.minimum(1.0 - 1e-6, img))
 
     fp = callbacks['save_png'](img)
     print(fp)
@@ -64,6 +65,7 @@ def reconstruct(dataset, sess, model, callbacks):
 
         if img.shape[-1] == 3:
             img = 0.5 * img + 0.5
+            img = np.maximum(1e-6, np.minimum(1.0 - 1e-6, img))
 
         fp = callbacks['save_png'](img)
         print(fp)
@@ -76,8 +78,8 @@ def interpolate(dataset, sess, model, callbacks):
         xs = batch
         permutation = np.random.permutation(batch_size)
         permuted_xs = xs[permutation]
-        z0 = model.get_code(sess, xs)
-        zT = model.get_code(sess, permuted_xs)
+        z0 = model.encode(sess, xs)
+        zT = model.encode(sess, permuted_xs)
         n = 5
         ts = [(t / float(n - 1)) for t in range(0, n)]
         zs = [(1. - t) * z0 + t * zT for t in ts]
@@ -88,7 +90,7 @@ def interpolate(dataset, sess, model, callbacks):
         columns.append(col)
         for i in range(0, n):
             zs_i = zs[i]
-            xs_i = model.generate_from_code(sess, zs_i)
+            xs_i = model.decode(sess, zs_i)
             col = np.concatenate(xs_i, axis=0)
             columns.append(col)
         col = np.concatenate(permuted_xs, axis=0)
@@ -98,6 +100,7 @@ def interpolate(dataset, sess, model, callbacks):
 
         if img.shape[-1] == 3:
             img = 0.5 * img + 0.5
+            img = np.maximum(1e-6, np.minimum(1.0 - 1e-6, img))
 
         fp = callbacks['save_png'](img)
         print(fp)
@@ -134,10 +137,10 @@ def interpolate_gif(dataset, sess, model, callbacks):
         permuted_xs = permuted_xs[0:S*S]
 
         # starting codes
-        z0 = model.get_code(sess, xs)
+        z0 = model.encode(sess, xs)
 
         # ending codes
-        zT = model.get_code(sess, permuted_xs)
+        zT = model.encode(sess, permuted_xs)
 
         # intermediate codes z_i
         n = 20
@@ -156,7 +159,7 @@ def interpolate_gif(dataset, sess, model, callbacks):
 
         for i in range(0, n):
             z_i = Z[:, i, :] # [B, Z]
-            x_i = model.generate_from_code(sess, z_i)
+            x_i = model.decode(sess, z_i)
             img = make_image_grid(x_i, S, S)
             img_frames.append(img)
 
@@ -171,7 +174,9 @@ def interpolate_gif(dataset, sess, model, callbacks):
             transform = lambda x_i: np.concatenate([x_i, x_i, x_i], axis=-1)
             img_frames = list(map(transform, img_frames))
         elif xs.shape[-1] == 3:
-            transform = lambda x_i: 0.5 * x_i + 0.5
+            transform1 = lambda x_i: 0.5 * x_i + 0.5
+            transform2 = lambda x_i: np.maximum(1e-6, np.minimum(1.0 - 1e-6, x_i))
+            transform = lambda x_i: transform2(transform1(x_i))
             img_frames = list(map(transform, img_frames))
 
         fp = callbacks['save_gif'](img_frames)

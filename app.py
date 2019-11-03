@@ -19,11 +19,10 @@ flags.DEFINE_integer("img_width", 32, "img_width: width to scale images to, in p
 flags.DEFINE_integer("img_channels", 1, "img_channels: number of image channels")
 
 flags.DEFINE_integer("batch_size", 64, "batch_size: number of examples per minibatch")
-flags.DEFINE_integer("num_filters", 32, "num_filters: number of convolutional filters per layer")
-flags.DEFINE_integer("z_dim", 100, "z_dim: dimension of latent variable z")
-flags.DEFINE_integer("encoder_res_blocks", 3, "encoder_res_blocks: number of blocks in the encoder")
-flags.DEFINE_integer("decoder_res_blocks", 3, "decoder_res_blocks: number of blocks in the decoder")
-flags.DEFINE_enum("activation", 'relu', ['relu', 'elu'], "activation: the activation function for the convolutional layers")
+flags.DEFINE_integer("enc_blocks", 3, "enc_blocks: number of blocks in the encoder")
+flags.DEFINE_integer("dec_blocks", 3, "dec_blocks: number of blocks in the decoder")
+flags.DEFINE_integer("num_filters", 32, "num_filters: number of filters per layer")
+flags.DEFINE_integer("code_size", 100, "code_size: dimension of latent variable z")
 
 flags.DEFINE_string("summaries_dir", '/tmp/vae_summaries/', "summaries_dir: directory for tensorboard logs")
 flags.DEFINE_string("output_dir", 'output/', "output_dir: directory for visualizations")
@@ -46,10 +45,9 @@ def main(_):
         img_width = FLAGS.img_width,
         img_channels = FLAGS.img_channels,
         num_filters = FLAGS.num_filters,
-        z_dim = FLAGS.z_dim,
-        encoder_res_blocks = FLAGS.encoder_res_blocks,
-        decoder_res_blocks = FLAGS.decoder_res_blocks,
-        activation = FLAGS.activation,
+        code_size = FLAGS.code_size,
+        enc_blocks = FLAGS.enc_blocks,
+        dec_blocks = FLAGS.dec_blocks,
         discrete_outputs = (True if FLAGS.img_channels == 1 else False),
         epochs = FLAGS.epochs)
 
