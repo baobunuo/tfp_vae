@@ -38,7 +38,7 @@ class VAE:
             self.elbo = tf.reduce_mean(self.elbo_x, axis=0)
             self.loss = -self.elbo
 
-            self.optimizer = tf.train.AdamOptimizer(1e-3)
+            self.optimizer = tf.train.AdamOptimizer(0.003)
             tvars = [v for v in tf.trainable_variables() if v.name.startswith(self.scope)]
             self.gradients, _ = zip(*self.optimizer.compute_gradients(self.loss, tvars))
 
@@ -132,6 +132,7 @@ class VAE:
                 inputs, filters=self.num_filters, kernel_size=4, strides=2, padding='valid',
                 kernel_initializer=glorot_init, activation=None)
 
+            ## residual block without bottleneck
             conv1 = tf.layers.conv2d(
                 conv0, filters=self.num_filters, kernel_size=3, strides=1, padding='same', 
                 kernel_initializer=he_init, activation=None)
@@ -156,6 +157,7 @@ class VAE:
                 inputs, filters=self.num_filters, kernel_size=4, strides=2, padding='same', 
                 kernel_initializer=glorot_init, activation=None)
 
+            ## residual block without bottleneck, except using transpose convolutions
             deconv1 = tf.layers.conv2d(
                 deconv0, filters=self.num_filters, kernel_size=3, strides=1, padding='same',
                 kernel_initializer=he_init, activation=None)
